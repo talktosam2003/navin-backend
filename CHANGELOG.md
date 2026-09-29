@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `emitNotificationNew()` emitter in `src/infra/socket/io.ts` for the new `notification:new` event targeted at user/organisation-scoped rooms
 - Added `SettlementStatusPayload` and `NotificationPayload` interfaces to `src/shared/types/socketEvents.ts`; deprecated `PaymentStatusPayload` alias kept for backward compatibility
 - Updated `docs/websockets.md` to document all renamed and new events with full payload schemas
+- Added `docs/chain-interface.md` (DRAFT v1) as the single source of truth for the Soroban contract interface: `anchor` / `init_escrow` / `release_escrow` function signatures, authorization rules, event topic+data tuples (`anchor`, `esc_init`, `esc_rel`), and contract-error taxonomy (#649, #727)
+- Added `src/shared/types/chain.ts` — typed TS mirror of the chain interface spec: Zod schemas for all function args and contract events (strict, snake_case to match Soroban ABI), `CHAIN_SPEC_VERSION`, `CHAIN_ERROR_MAP`, `parseChainEvent`, and `chainErrorToAppError`; backend chain shapes are imported only from this file (#651)
+- Added `src/services/chain/types.ts` — `ChainAdapter` port defining `anchorEvent` / `releaseEscrow` / `streamEvents`; every method rejects with `AppError` carrying an `ERR_CHAIN_*` code, replacing the silent `{ success: false }` from the legacy Stellar service (#650)
+- Added `src/services/chain/simulated.adapter.ts` — `SimulatedAdapter` implementing the port behind today's Horizon `manageData` flows; all receipts carry `simulated: true` so demos never imply real escrow; includes per-account submission serialization and `tx_bad_seq` retry (#650)
+- Added `src/services/chain/factory.ts` — config-selected adapter factory; consumers call `getChainAdapter()` and depend only on the port types, never an implementation or the Stellar SDK directly (#650)
+- Added `tests/fixtures/chain/` — golden-vector JSON fixtures (`events.json`, `functions.json`, `errors.json`) at spec version `1.0.0-draft`; used by the dual-binding contract suite to enforce byte-identical expectations across adapters (#651)
+- Added `ERR_CHAIN_*` error codes to `src/shared/http/errors.ts` and `docs/ERROR_CODES.md` covering `ERR_CHAIN_UNAUTHORIZED`, `ERR_CHAIN_INVALID_HASH`, `ERR_CHAIN_ALREADY_ANCHORED`, `ERR_CHAIN_ESCROW_EXISTS`, `ERR_CHAIN_ESCROW_NOT_FOUND`, `ERR_CHAIN_ESCROW_ALREADY_RELEASED`, `ERR_CHAIN_INVALID_AMOUNT`, `ERR_CHAIN_INVALID_PROOF`, `ERR_CHAIN_INVALID_EVENT`, `ERR_CHAIN_UNKNOWN` (#650)
 
 ### Changed
 
