@@ -1,6 +1,7 @@
 import { jest, describe, beforeAll, beforeEach, it, expect } from '@jest/globals';
 import request from 'supertest';
 import { fileURLToPath } from 'node:url';
+import { Types } from 'mongoose';
 import type { Application } from 'express';
 import { signToken } from './fixtures/factories.js';
 
@@ -15,6 +16,10 @@ type UserRecord = { _id: string; email: string; passwordHash: string; role: stri
 const authUsers: UserRecord[] = [];
 
 const shipmentsData: ShipmentRecord[] = [];
+
+// Valid ObjectIds used in JWT claims — per AGENTS.md §3, real ObjectIds must be used.
+const TEST_USER_ID = new Types.ObjectId().toString();
+const TEST_ORG_ID = new Types.ObjectId().toString();
 
 await jest.unstable_mockModule('../src/modules/shipments/shipments.model.js', () => {
   type ShipmentInput = Record<string, unknown> & {
@@ -38,7 +43,7 @@ await jest.unstable_mockModule('../src/modules/shipments/shipments.model.js', ()
   } as unknown as ShipmentCtor;
 
   ShipmentConstructor.create = (doc) => {
-    const d = { ...doc, _id: String(shipmentsData.length) };
+    const d = { ...doc, _id: new Types.ObjectId().toString() };
     shipmentsData.push(d as ShipmentRecord);
     return Promise.resolve(d);
   };
@@ -69,7 +74,7 @@ describe('POST /api/shipments/:id/proof', () => {
   beforeAll(async () => {
     const appModule = await import('../src/app.js');
     app = appModule.buildApp();
-    authToken = signToken({ userId: 'user-1', role: 'MANAGER', organizationId: 'org-1' });
+    authToken = signToken({ userId: TEST_USER_ID, role: 'MANAGER', organizationId: TEST_ORG_ID });
   });
 
   beforeEach(() => {
@@ -171,7 +176,7 @@ describe('POST /api/shipments/:id/proof', () => {
       status: 'CREATED',
     });
 
-    const viewerToken = signToken({ userId: 'user-viewer', role: 'VIEWER', organizationId: 'org-1' });
+    const viewerToken = signToken({ userId: new Types.ObjectId().toString(), role: 'VIEWER', organizationId: TEST_ORG_ID });
 
     const res = await request(app)
       .post(`/api/shipments/${shipment._id}/proof`)

@@ -2,6 +2,7 @@ import { jest, describe, beforeAll, beforeEach, it, expect } from '@jest/globals
 import request from 'supertest';
 import { signToken } from './fixtures/factories.js';
 import { randomUUID } from 'crypto';
+import { Types } from 'mongoose';
 import type { Application } from 'express';
 import { env } from '../src/env.js';
 import { UserRole } from '../src/shared/constants/index.js';
@@ -82,7 +83,7 @@ await jest.unstable_mockModule('../src/infra/socket/io.js', () => ({
 const { buildApp } = await import('../src/app.js');
 
 function tokenFor(role: string, organizationId: string) {
-  return signToken({ userId: 'user-1', role, organizationId, jti: randomUUID() }, { expiresIn: '1h' });
+  return signToken({ userId: new Types.ObjectId().toString(), role, organizationId, jti: randomUUID() }, { expiresIn: '1h' });
 }
 
 describe('GET /api/shipments/:id', () => {
