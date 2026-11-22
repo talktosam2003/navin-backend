@@ -26,6 +26,9 @@ function makeSocket(
 }
 
 // Mock shipmentRooms so leaveAllShipmentRoomsOnDisconnect is a no-op
+// AGENTS.md §3: reset before registering mocks.
+jest.resetModules();
+
 jest.unstable_mockModule('../shipmentRooms.js', () => ({
   leaveAllShipmentRoomsOnDisconnect: jest.fn(),
   joinShipmentRoom: jest.fn(),

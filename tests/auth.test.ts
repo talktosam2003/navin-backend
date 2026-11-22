@@ -30,6 +30,10 @@ const mockOrgFindById = jest.fn() as jest.MockedFunction<
   (id: string) => Promise<OrganizationDoc | null>
 >;
 
+// AGENTS.md §3: reset before registering mocks so the module registry is clean
+// before any unstable_mockModule call.
+jest.resetModules();
+
 jest.unstable_mockModule('../src/modules/users/users.model.js', () => ({
   UserModel: {
     create: mockCreate,

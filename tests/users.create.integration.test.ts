@@ -5,6 +5,10 @@ import type { Application } from 'express';
 
 const mockRegisterUser = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 
+// AGENTS.md §3: reset before registering mocks so the module registry is clean
+// before any unstable_mockModule call.
+jest.resetModules();
+
 await jest.unstable_mockModule('../src/modules/users/users.service.js', () => ({
   registerUser: mockRegisterUser,
 }));
