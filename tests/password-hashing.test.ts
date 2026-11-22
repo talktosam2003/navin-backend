@@ -12,6 +12,7 @@
 import bcrypt from 'bcrypt';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { randomBytes } from 'crypto';
+import { Types } from 'mongoose';
 
 // ---------------------------------------------------------------------------
 // Shared mock factories
@@ -19,11 +20,11 @@ import { randomBytes } from 'crypto';
 
 function makeUserDoc(overrides: Record<string, unknown> = {}) {
   return {
-    _id: { toString: () => 'user-id-123' },
+    _id: { toString: () => new Types.ObjectId().toString() },
     email: 'test@example.com',
     name: 'Test User',
     role: 'VIEWER',
-    organizationId: { toString: () => 'org-id-1' },
+    organizationId: { toString: () => new Types.ObjectId().toString() },
     ...overrides,
   };
 }

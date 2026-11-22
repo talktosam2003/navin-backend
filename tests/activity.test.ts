@@ -7,8 +7,12 @@ import { AuditLog } from '../src/modules/audit-logs/auditLogs.model.js';
 
 const app = buildApp();
 
-function makeToken(role: string, userId = 'user-000000000000000000000001'): string {
-  return signToken({ userId, role, organizationId: 'org-1' });
+// Valid ObjectIds used as JWT claims — per AGENTS.md §3.
+const ACTIVITY_USER_ID = new Types.ObjectId().toString();
+const ACTIVITY_ORG_ID = new Types.ObjectId().toString();
+
+function makeToken(role: string, userId = ACTIVITY_USER_ID): string {
+  return signToken({ userId, role, organizationId: ACTIVITY_ORG_ID });
 }
 
 afterEach(async () => {
@@ -21,40 +25,46 @@ async function seedLogs() {
   const userId = new Types.ObjectId();
   const base = new Date('2026-06-01T12:00:00.000Z');
 
+  // Use valid ObjectIds for resourceId per AGENTS.md §3.
+  const shipResourceId = new Types.ObjectId().toString();
+  const userResourceId = new Types.ObjectId().toString();
+  const anomalyResourceId = new Types.ObjectId().toString();
+  const payResourceId = new Types.ObjectId().toString();
+
   await AuditLog.create([
     {
       userId,
       action: 'SHIPMENT_CREATED',
       resource: 'SHIPMENT',
-      resourceId: 'ship-1',
+      resourceId: shipResourceId,
       timestamp: new Date(base.getTime() + 1_000),
     },
     {
       userId,
       action: 'USER_INVITED',
       resource: 'USER',
-      resourceId: 'user-1',
+      resourceId: userResourceId,
       timestamp: new Date(base.getTime() + 2_000),
     },
     {
       userId,
       action: 'ANOMALY_DETECTED',
       resource: 'ANOMALY',
-      resourceId: 'anomaly-1',
+      resourceId: anomalyResourceId,
       timestamp: new Date(base.getTime() + 3_000),
     },
     {
       userId,
       action: 'PROOF_UPLOADED',
       resource: 'SHIPMENT',
-      resourceId: 'ship-1',
+      resourceId: shipResourceId,
       timestamp: new Date(base.getTime() + 4_000),
     },
     {
       userId,
       action: 'SETTLEMENT_RELEASED',
       resource: 'PAYMENT',
-      resourceId: 'pay-1',
+      resourceId: payResourceId,
       timestamp: new Date(base.getTime() + 5_000),
     },
   ]);

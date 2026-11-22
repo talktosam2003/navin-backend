@@ -383,9 +383,9 @@ export function invitationArgs<T extends Record<string, unknown>>(overrides: T =
   return {
     email: 'user@test.com',
     role: 'VIEWER',
-    inviterId: 'user-1',
+    inviterId: new Types.ObjectId().toString(),
     inviterRole: 'ADMIN',
-    organizationId: 'org-1',
+    organizationId: new Types.ObjectId().toString(),
     ...overrides,
   };
 }

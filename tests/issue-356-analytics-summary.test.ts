@@ -1,4 +1,5 @@
 import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import { Types } from 'mongoose';
 
 // Mock data
 const shipments: Record<string, unknown>[] = [];
@@ -122,6 +123,10 @@ describe('#356 - Analytics Summary with KPI Sparklines', () => {
     process.env.FRONTEND_URL = 'http://localhost:3000';
   });
 
+  // Valid ObjectIds used for organizationId — per AGENTS.md §3.
+  const ORG_ID_1 = new Types.ObjectId().toString();
+  const ORG_ID_2 = new Types.ObjectId().toString();
+
   beforeEach(() => {
     shipments.length = 0;
     mockCacheData.clear();
@@ -133,9 +138,9 @@ describe('#356 - Analytics Summary with KPI Sparklines', () => {
       const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       for (let j = 0; j < 10; j++) {
         shipments.push({
-          _id: `ship-${i}-${j}`,
+          _id: new Types.ObjectId().toString(),
           createdAt: date,
-          organizationId: 'org-1',
+          organizationId: ORG_ID_1,
           expectedDelivery: new Date(date.getTime() + 5 * 24 * 60 * 60 * 1000),
           isOnTime: Math.random() > 0.2, // 80% on time
           transitDays: Math.random() * 10 + 2, // 2-12 days
@@ -240,7 +245,7 @@ describe('#356 - Analytics Summary with KPI Sparklines', () => {
   });
 
   it('should support organizationId parameter for scoped analytics', async () => {
-    const summary = await getAnalyticsSummary({ organizationId: 'org-1' });
+    const summary = await getAnalyticsSummary({ organizationId: ORG_ID_1 });
 
     expect(summary).toHaveProperty('onTimeDeliveryRate');
     expect(summary.totalShipmentsThisMonth).toBeGreaterThanOrEqual(0);
@@ -256,8 +261,8 @@ describe('#356 - Analytics Summary with KPI Sparklines', () => {
   });
 
   it('should cache different organizations separately', async () => {
-    const summary1 = await getAnalyticsSummary({ organizationId: 'org-1' });
-    const summary2 = await getAnalyticsSummary({ organizationId: 'org-2' });
+    const summary1 = await getAnalyticsSummary({ organizationId: ORG_ID_1 });
+    const summary2 = await getAnalyticsSummary({ organizationId: ORG_ID_2 });
 
     expect(mockRedisClient.set).toHaveBeenCalledTimes(2);
 
